@@ -5,3 +5,4 @@ node {
     stage('echo') { 
         sh 'mkdir hello'
     }
+}
