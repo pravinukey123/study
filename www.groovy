@@ -1,6 +1,6 @@
-// read file from workspace
-job('example-2') {
+// execute echo command
+job('example-1') {
     steps {
-        sh 'pwd  >> pwd.txt'
+        shell('echo Hello World!')
     }
 }
