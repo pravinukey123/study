@@ -1,5 +1,5 @@
 // execute echo command
-job('example-1') {
+job('example-2') {
     steps {
         shell('echo Hello World!')
     }
