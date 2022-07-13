@@ -1,15 +1,15 @@
 pipeline {
-    agent { label 'komal'} 
+    agent { label 'node-1'} 
     stages {
         stage('git') { 
             steps {
                 echo 'Hello, Pravin'
-                sh 'java --version'
+                
             }
         }
         stage('git clone') {
             steps {
-               git 'https://github.com/pravinukey123/demo.git'
+               git branch: 'main', url: 'https://github.com/pravinukey123/study.git'
             }
         }
     }
