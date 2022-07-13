@@ -1,0 +1,14 @@
+pipeline {
+    agent { label 'komal'} 
+    stages {
+        stage('git') { 
+            steps {
+                echo 'Hello, Pravin'
+                sh 'java --version'
+            }
+        }
+        stage('git clone') {
+            steps {
+               git 'https://github.com/pravinukey123/demo.git'
+            }
+        }
