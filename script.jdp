@@ -10,6 +10,7 @@ pipeline {
 
           stage('install maven') {
             steps {
+                sh 'sudo -i'
                 sh 'sudo apt update'
                 sh 'sudo apt install openjdk-8-jre-headless'
                 sh 'sudo apt update'
