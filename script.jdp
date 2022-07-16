@@ -15,7 +15,6 @@ pipeline {
                 sh 'sudo apt install openjdk-8-jre-headless'
                 sh 'sudo apt update'
                 sh 'sudo apt install maven -y'
-                sh 'sudo mvn clean package'
                 sh 'sudo apt update'
             }  
         }
