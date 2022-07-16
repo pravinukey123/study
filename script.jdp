@@ -1,5 +1,5 @@
 pipeline {
-    agent { label 'node-1'} 
+    agent { label 'ubuntu-1'} 
     stages {
 
         stage('git clone') {
@@ -16,7 +16,7 @@ pipeline {
                 sh 'sudo apt install maven'
                 sh 'sudo mvn clean package'
                 sh 'sudo apt update'
-               
+            }  
         }
            stage('install tomcat') {
             steps {
@@ -24,6 +24,7 @@ pipeline {
                 sh 'sudo wget https://dlcdn.apache.org/tomcat/tomcat-8/v8.5.81/bin/apache-tomcat-8.5.81.tar.gz'
                 sh 'sudo tar -xvzf /home/ubuntu/workspace/new-pipeline-job/apache-tomcat-8.5.81.tar.gz -C /mnt'
                 sh 'sudo /mnt/apache-tomcat-8.5.81/bin/catalina.sh start'
+            }
                
         }
 
