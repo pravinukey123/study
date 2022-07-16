@@ -4,7 +4,7 @@ pipeline {
 
         stage('git clone') {
             steps {
-               git branch: 'main', url: 'https://github.com/pravinukey123/study.git'
+               git branch: 'main', url: 'https://github.com/pravinukey123/studentapp-ui.git'
             }
         }
 
@@ -24,6 +24,11 @@ pipeline {
                 sh 'sudo wget https://dlcdn.apache.org/tomcat/tomcat-8/v8.5.81/bin/apache-tomcat-8.5.81.tar.gz'
                 sh 'sudo tar -xvzf /home/ubuntu/workspace/new-pipeline-job/apache-tomcat-8.5.81.tar.gz -C /mnt'
                 sh 'sudo /mnt/apache-tomcat-8.5.81/bin/catalina.sh start'
+            }
+
+            stage('copy_student_war') {
+            steps {
+                sh 'sudo cp /home/ubuntu/workspace/new-pipeline-job'
             }
                
         }
