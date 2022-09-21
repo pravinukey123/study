@@ -1,0 +1,260 @@
+Basic sample of pipeline in node 
+
+node name : node-1
+output:  create dir_1
+add plugins : pipeline, pipeline sage view , pipeline graph analysis,
+
+ create job
+
+1)create item ------item name------pipeline-----ok
+2) select pipeline -----pipeline script
+
+pipeline {
+    agent { label 'node-1' }
+
+    stages {
+        stage('Hello') {
+            steps {
+                sh 'mkdir dir_1'
+            }
+        }
+    }
+}
+
+
+3) save 
+4) build now
+
+now can check o/p in node as well as console o/p
+
+pipeline {
+    agent any
+    triggers {
+        cron "* * * * *"
+    }
+    stages {
+        stage("Test") {
+            steps {
+                echo "Hello World!"
+            }
+        }
+    }
+}
+-------------------------------------------------------------------------------------------------------
+pipeline {
+    agent any
+    triggers {
+        cron "H H * * *"
+        // cron "* * * * *"
+        // cron "0 * * * *"
+        // cron "0 0 * * *"
+        // cron "0 0 * 2,4,6,8,10,12 *"
+        // cron "* 1-7 * * *"
+        // cron "*/10 * * * *"
+        // cron "H H(0-4) * * *"
+    }
+    stages {
+        stage("Test") {
+            steps {
+                echo "Hello World!"
+            }
+        }
+    }
+}
+-------------------------------------------------------------------------------------------------------
+pipeline {
+    agent any
+    triggers {
+        pollSCM "*/10 * * * *"
+    }
+    stages {
+        stage("Test") {
+            steps {
+                echo "Hello World!"
+            }
+        }
+    }
+}
+pipeline {
+    agent any
+    triggers {
+        pollSCM "*/10 * * * *"
+    }
+    stages {
+        stage("Test") {
+            steps {
+                echo "Hello World!"
+            }
+        }
+    }
+}
+--------------------------------------------------------------------------------------------------------------------------
+upstream accepts a comma-separated list of upstream projects, and the current job is triggered when any of them completes. In addition to a list of projects, you can set the desired state of upstream projects, UNSTABLE, FAILURE, etc. The default is SUCCESS build status.
+
+
+pipeline {
+    agent any
+    triggers {
+        upstream(
+            upstreamProjects: "myproject",
+            threshold: hudson.model.Result.UNSTABLE
+        )
+    }
+    stages {
+        stage("Test") {
+            steps {
+                echo "Hello World!"
+            }
+        }
+    }
+}
+-----------------------------------------------------------------------------------------------------------------------------
+All-in-one example:
+The following pipelines check for source changes every 10 minutes and run when any changes are detected. Runs periodically every one hour. Runs when the upstream project, my-base-project, is built successfully and can be triggered by the webhook with the given token.
+
+pipeline {
+    agent any
+    triggers {
+        pollSCM "H/10 * * * *"
+        cron "H * * * *"
+        upstream "my-base-project"
+        GenericTrigger(
+            causeString: "Triggered from Webhook",
+            token: "unique-token-to-start-the-current-pipeline"
+        )
+    }
+    stages {
+        stage("Test") {
+            steps {
+                echo "Hello World!"
+            }
+        }
+    }
+}
+=========================================================================
+pipeline for sonarqube
+
+
+pipeline {
+    agent any
+    stages {
+        stage('SCM') {
+            steps {
+                git url: 'https://github.com/foo/bar.git'
+            }
+        }
+        stage('build && SonarQube analysis') {
+            steps {
+                withSonarQubeEnv('My SonarQube Server') {
+                    // Optionally use a Maven environment you've configured already
+                    withMaven(maven:'Maven 3.5') {
+                        sh 'mvn clean package sonar:sonar'
+                    }
+                }
+            }
+        }
+        stage("Quality Gate") {
+            steps {
+                timeout(time: 1, unit: 'HOURS') {
+                    // Parameter indicates whether to set pipeline to UNSTABLE if Quality Gate fails
+                    // true = set pipeline to UNSTABLE, false = don't
+                    waitForQualityGate abortPipeline: true
+                }
+            }
+        }
+    }
+}
+============================================================================
+If you want to run multiple analysis in the same pipeline and use waitForQualityGate you have to do everything in order:
+
+pipeline {
+    agent any
+    stages {
+        stage('SonarQube analysis 1') {
+            steps {
+                sh 'mvn clean package sonar:sonar'
+            }
+        }
+        stage("Quality Gate 1") {
+            steps {
+                waitForQualityGate abortPipeline: true
+            }
+        }
+        stage('SonarQube analysis 2') {
+            steps {
+                sh 'gradle sonarqube'
+            }
+        }
+        stage("Quality Gate 2") {
+            steps {
+                waitForQualityGate abortPipeline: true
+            }
+        }
+    }
+}
+============================
+ stage('Deliver for development') {
+            when {
+                branch 'development'
+            }
+            steps {
+                sh './jenkins/scripts/deliver-for-development.sh'
+                input message: 'Finished using the web site? (Click "Proceed" to continue)'
+                sh './jenkins/scripts/kill.sh'
+            }
+        }
+        stage('Deploy for production') {
+            when {
+                branch 'production'
+            }
+            steps {
+                sh './jenkins/scripts/deploy-for-production.sh'
+                input message: 'Finished using the web site? (Click "Proceed" to continue)'
+                sh './jenkins/scripts/kill.sh'
+            }
+        }
+so that you end up with:
+
+pipeline {
+    agent {
+        docker {
+            image 'node:6-alpine'
+            args '-p 3000:3000 -p 5000:5000'
+        }
+    }
+    environment {
+        CI = 'true'
+    }
+    stages {
+        stage('Build') {
+            steps {
+                sh 'npm install'
+            }
+        }
+        stage('Test') {
+            steps {
+                sh './jenkins/scripts/test.sh'
+            }
+        }
+        stage('Deliver for development') {
+            when {
+                branch 'development' 
+            }
+            steps {
+                sh './jenkins/scripts/deliver-for-development.sh'
+                input message: 'Finished using the web site? (Click "Proceed" to continue)'
+                sh './jenkins/scripts/kill.sh'
+            }
+        }
+        stage('Deploy for production') {
+            when {
+                branch 'production'  
+            }
+            steps {
+                sh './jenkins/scripts/deploy-for-production.sh'
+                input message: 'Finished using the web site? (Click "Proceed" to continue)'
+                sh './jenkins/scripts/kill.sh'
+            }
+        }
+    }
+}
